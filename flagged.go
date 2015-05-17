@@ -60,7 +60,6 @@ var re_deCamel = regexp.MustCompile(`([A-Z])`)
 // Register the flags and view the usage:
 //
 // 	  flagged.Parse(&setting)
-
 func Parse(value_ interface{}) {
 	ParseWithPrefix(value_, Prefix)
 }

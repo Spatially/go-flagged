@@ -1,4 +1,4 @@
-# `flagged usage:"Declarative flags."`
+# `usage:"Declarative flags."`
 
 `flagged` utilizes struct-tags to register flags. If there isn't at least a `usage:` struct-tag, the element is ignored.
 
