@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	flagged ".."
+	flagged "github.com/Urban4M/go-flagged"
 )
 
 //
