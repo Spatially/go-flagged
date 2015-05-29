@@ -56,8 +56,8 @@ var setting struct {
 //
 func main() {
 	flagged.FlaggedDebugging = true
-	flagged.Parse(&setting)
-	flagged.ParseWithPrefix(&setting.ints, "ok")
+	flagged.Parse(&setting, flagged.Continue)
+	flagged.ParseWithPrefix(&setting.ints, "ok", flagged.Continue)
 	flagged.ParseWithPrefix(&setting.named, "weird")
 	flag.Usage()
 	log.Printf("%+v", setting)

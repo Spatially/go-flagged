@@ -25,6 +25,12 @@ var (
 	Separator = "."
 )
 
+type options uint8
+
+const (
+	Continue options = iota
+)
+
 //
 type environment map[string]string
 
@@ -60,13 +66,13 @@ var re_deCamel = regexp.MustCompile(`([A-Z])`)
 // Register the flags and view the usage:
 //
 // 	  flagged.Parse(&setting)
-func Parse(value_ interface{}) {
-	ParseWithPrefix(value_, Prefix)
+func Parse(value_ interface{}, options_ ...options) {
+	ParseWithPrefix(value_, Prefix, options_...)
 }
 
 // Pass a pointer to the flagged-tagged struct and a prefix string and ParseWithPrefix will
 // register all the flags prefixed with `prefix`.
-func ParseWithPrefix(value_ interface{}, prefix string) {
+func ParseWithPrefix(value_ interface{}, prefix string, options_ ...options) {
 	// Just so that this package does not keep the environment itself.
 	var env = getenvironment(os.Environ(), func(item string) (key, val string) {
 		splits := strings.Split(item, "=")
@@ -75,7 +81,16 @@ func ParseWithPrefix(value_ interface{}, prefix string) {
 		return
 	})
 	parser(value_, prefix, env)
-	flag.Parse()
+	parse := true
+	for _, o := range options_ {
+		switch o {
+		case Continue:
+			parse = false
+		}
+	}
+	if parse {
+		flag.Parse()
+	}
 }
 
 //
