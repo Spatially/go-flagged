@@ -28,6 +28,9 @@ var (
 type options uint8
 
 const (
+	// Pass flagged.Continue to flagged.Parse functions if you want to register different structs.
+	// Not passing Continue will cause the flagged.Parse functions to call flag.Parse, meaning that
+	// any subsequent calls to flagged.Parse will not have any impact.
 	Continue options = iota
 )
 

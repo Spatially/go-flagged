@@ -56,9 +56,11 @@ var setting struct {
 //
 func main() {
 	flagged.FlaggedDebugging = true
-	flagged.Parse(&setting, flagged.Continue)
+	// This is just an example of how you can use parts of a struct instead of the entire struct:
 	flagged.ParseWithPrefix(&setting.ints, "ok", flagged.Continue)
-	flagged.ParseWithPrefix(&setting.named, "weird")
+	flagged.ParseWithPrefix(&setting.named, "weird", flagged.Continue)
+	// This is typically all you'll need to call:
+	flagged.Parse(&setting)
 	flag.Usage()
 	log.Printf("%+v", setting)
 }
