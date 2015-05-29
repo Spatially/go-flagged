@@ -75,6 +75,7 @@ func ParseWithPrefix(value_ interface{}, prefix string) {
 		return
 	})
 	parser(value_, prefix, env)
+	flag.Parse()
 }
 
 //

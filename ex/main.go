@@ -59,6 +59,6 @@ func main() {
 	flagged.Parse(&setting)
 	flagged.ParseWithPrefix(&setting.ints, "ok")
 	flagged.ParseWithPrefix(&setting.named, "weird")
-	log.Printf("%+v", setting)
 	flag.Usage()
+	log.Printf("%+v", setting)
 }
