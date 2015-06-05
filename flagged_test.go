@@ -7,11 +7,11 @@ import (
 
 //
 var setting struct {
-	unnamed struct {
+	UNNAMED struct {
 		aString string  `usage:"A String."`
 		aBool   bool    `usage:"A Bool."`
 		aFloat  float64 `usage:"A Float."`
-		ints    struct {
+		INTS    struct {
 			anInt    int    `usage:"An Int."`
 			anInt64  int64  `usage:"An Int64."`
 			anUint   uint   `usage:"An Uint."`

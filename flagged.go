@@ -111,13 +111,13 @@ func parser(value_ interface{}, prefix string, env environment) {
 				case reflect.Struct:
 					t_ := t.Type()
 					f_ := t_.Field(f)
-					name := prefix
+					name := strings.ToLower(prefix)
 					if name == "" {
 						name = f_.Name
 					} else {
 						name = fmt.Sprintf("%s%s%s", name, Separator, f_.Name)
 					}
-					parser(field, name, env)
+					parser(field, strings.ToLower(name), env)
 				default:
 					if field.CanAddr() {
 						t_ := t.Type()
@@ -135,9 +135,9 @@ func parser(value_ interface{}, prefix string, env environment) {
 						if name == "" {
 							name = f_.Name
 							name = fmt.Sprintf("%s%s", strings.ToLower(name[:1]), strings.ToLower(re_deCamel.ReplaceAllString(name[1:], `.$1`)))
-						}
-						if prefix != "" {
-							name = fmt.Sprintf("%s%s%s", prefix, Separator, name)
+							if prefix != "" {
+								name = fmt.Sprintf("%s%s%s", prefix, Separator, name)
+							}
 						}
 						envrionment_ := tag.Get("env")
 						if envrionment_ != "" {
