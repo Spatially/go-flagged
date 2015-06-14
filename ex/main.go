@@ -56,6 +56,16 @@ var setting struct {
 		y int `flag:"yy" env:"ALIASED" value:"345" usage:"An Int."`
 		z int `flag:"_,a" env:"ALIASED" value:"567" usage:"An Int."`
 	}
+	subbed struct {
+		one subsub `usage:"One. "`
+		two subsub
+	} `usage:"A sub. "`
+}
+
+type subsub struct {
+	aString string  `usage:"A String."`
+	aBool   bool    `usage:"A Bool."`
+	aFloat  float64 `usage:"A Float."`
 }
 
 //

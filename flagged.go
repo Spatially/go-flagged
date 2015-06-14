@@ -83,7 +83,7 @@ func ParseWithPrefix(value_ interface{}, prefix string, options_ ...options) {
 		val = splits[1]
 		return
 	})
-	parser(value_, prefix, "", env)
+	parser(value_, prefix, parental{}, env)
 	parse := true
 	for _, o := range options_ {
 		switch o {
@@ -96,8 +96,12 @@ func ParseWithPrefix(value_ interface{}, prefix string, options_ ...options) {
 	}
 }
 
+type parental struct {
+	name, usage string
+}
+
 //
-func parser(value_ interface{}, prefix string, parent string, env environment) {
+func parser(value_ interface{}, prefix string, parent parental, env environment) {
 	switch t := value_.(type) {
 	case reflect.Value:
 		switch t.Kind() {
@@ -117,8 +121,11 @@ func parser(value_ interface{}, prefix string, parent string, env environment) {
 					} else {
 						name = fmt.Sprintf("%s%s%s", name, Separator, f_.Name)
 					}
-					parent = fmt.Sprintf("%s.%s", parent, f_.Name)
-					parser(field, strings.ToLower(name), parent, env)
+					p := parental{
+						name:  fmt.Sprintf("%s.%s", parent.name, f_.Name),
+						usage: fmt.Sprintf("%s%s", parent.usage, f_.Tag.Get("usage")),
+					}
+					parser(field, strings.ToLower(name), p, env)
 				default:
 					if field.CanAddr() {
 						t_ := t.Type()
@@ -140,7 +147,7 @@ func parser(value_ interface{}, prefix string, parent string, env environment) {
 							usage = fmt.Sprintf("%s (%s)", usage, envrionment_)
 						}
 
-						destination := fmt.Sprintf("%s.%s", parent, f_.Name)
+						destination := fmt.Sprintf("%s.%s", parent.name, f_.Name)
 
 						aliased := ""
 						names := strings.Split(name, ",")
@@ -172,6 +179,8 @@ func parser(value_ interface{}, prefix string, parent string, env environment) {
 							description := usage
 							if aliased != "" && name != aliased {
 								description = fmt.Sprintf("alias for -%s: %s", aliased, usage)
+							} else {
+								description = fmt.Sprintf("%s%s", parent.usage, description)
 							}
 
 							var default_ interface{} = value
