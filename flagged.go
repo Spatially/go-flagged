@@ -83,7 +83,7 @@ func ParseWithPrefix(value_ interface{}, prefix string, options_ ...options) {
 		val = splits[1]
 		return
 	})
-	parser(value_, prefix, env)
+	parser(value_, prefix, "", env)
 	parse := true
 	for _, o := range options_ {
 		switch o {
@@ -97,12 +97,12 @@ func ParseWithPrefix(value_ interface{}, prefix string, options_ ...options) {
 }
 
 //
-func parser(value_ interface{}, prefix string, env environment) {
+func parser(value_ interface{}, prefix string, parent string, env environment) {
 	switch t := value_.(type) {
 	case reflect.Value:
 		switch t.Kind() {
 		case reflect.Ptr:
-			parser(t.Elem(), prefix, env)
+			parser(t.Elem(), prefix, parent, env)
 		case reflect.Struct:
 			for f, fs := 0, t.NumField(); f < fs; f++ {
 				field := t.Field(f)
@@ -117,7 +117,8 @@ func parser(value_ interface{}, prefix string, env environment) {
 					} else {
 						name = fmt.Sprintf("%s%s%s", name, Separator, f_.Name)
 					}
-					parser(field, strings.ToLower(name), env)
+					parent = fmt.Sprintf("%s.%s", parent, f_.Name)
+					parser(field, strings.ToLower(name), parent, env)
 				default:
 					if field.CanAddr() {
 						t_ := t.Type()
@@ -126,101 +127,131 @@ func parser(value_ interface{}, prefix string, env environment) {
 						if tag == "" {
 							continue
 						}
-						name := tag.Get("flag")
 						usage := tag.Get("usage")
 						if usage == "" {
 							continue
 						}
+						name := tag.Get("flag")
 						value := tag.Get("value")
-						if name == "" {
-							name = f_.Name
-							name = fmt.Sprintf("%s%s", strings.ToLower(name[:1]), strings.ToLower(re_deCamel.ReplaceAllString(name[1:], `.$1`)))
-							if prefix != "" {
-								name = fmt.Sprintf("%s%s%s", prefix, Separator, name)
-							}
-						}
+
 						envrionment_ := tag.Get("env")
 						if envrionment_ != "" {
 							value = env.get(envrionment_, value)
 							usage = fmt.Sprintf("%s (%s)", usage, envrionment_)
 						}
 
-						var default_ interface{} = value
+						destination := fmt.Sprintf("%s.%s", parent, f_.Name)
 
-						if err := func() (err error) {
-							defer func() {
-								if r := recover(); r != nil {
-									err = fmt.Errorf("%+v", r)
+						aliased := ""
+						names := strings.Split(name, ",")
+						{
+							previous := ""
+							for i, name := range names {
+								name = strings.TrimSpace(name)
+								if name == "_" || (i == 0 && name == "") {
+									name = f_.Name
+									name = fmt.Sprintf("%s%s", strings.ToLower(name[:1]), strings.ToLower(re_deCamel.ReplaceAllString(name[1:], `.$1`)))
+									if prefix != "" {
+										name = fmt.Sprintf("%s%s%s", prefix, Separator, name)
+									}
+								} else if i > 0 && aliased == "" {
+									aliased = previous
 								}
-							}()
-
-							switch kind {
-							case reflect.Bool:
-								p := (*bool)(unsafe.Pointer(field.Addr().Pointer()))
-								default_ = value == "true"
-								flag.BoolVar(p, name, default_.(bool), usage)
-
-							case reflect.String:
-								p := (*string)(unsafe.Pointer(field.Addr().Pointer()))
-								flag.StringVar(p, name, value, usage)
-
-							case reflect.Float64:
-								p := (*float64)(unsafe.Pointer(field.Addr().Pointer()))
-								if f, err := strconv.ParseFloat(value, 64); err != nil {
-									default_ = field.Float()
-								} else {
-									default_ = f
+								if aliased == "" {
+									aliased = name
 								}
-								flag.Float64Var(p, name, default_.(float64), usage)
+								previous = name
+								names[i] = name
+							}
+						}
 
-							case reflect.Int64, reflect.Uint64, reflect.Int, reflect.Uint:
+						for _, name := range names {
+							if name == "" {
+								continue
+							}
+							description := usage
+							if aliased != "" && name != aliased {
+								description = fmt.Sprintf("alias for -%s: %s", aliased, usage)
+							}
+
+							var default_ interface{} = value
+
+							if err := func() (err error) {
+								defer func() {
+									if r := recover(); r != nil {
+										err = fmt.Errorf("%+v", r)
+									}
+								}()
 
 								switch kind {
-								case reflect.Int64, reflect.Int:
-									if i, err := strconv.ParseInt(value, 10, 64); err != nil {
-										default_ = field.Int()
-									} else {
-										default_ = i
-									}
-								case reflect.Uint64, reflect.Uint:
-									if i, err := strconv.ParseUint(value, 10, 64); err != nil {
-										default_ = field.Uint()
-									} else {
-										default_ = i
-									}
-								}
+								case reflect.Bool:
+									p := (*bool)(unsafe.Pointer(field.Addr().Pointer()))
+									default_ = value == "true"
+									flag.BoolVar(p, name, default_.(bool), description)
 
-								switch kind {
-								case reflect.Int64:
-									p := (*int64)(unsafe.Pointer(field.Addr().Pointer()))
-									flag.Int64Var(p, name, default_.(int64), usage)
-								case reflect.Int:
-									p := (*int)(unsafe.Pointer(field.Addr().Pointer()))
-									flag.IntVar(p, name, int(default_.(int64)), usage)
-								case reflect.Uint64:
-									p := (*uint64)(unsafe.Pointer(field.Addr().Pointer()))
-									flag.Uint64Var(p, name, default_.(uint64), usage)
-								case reflect.Uint:
-									p := (*uint)(unsafe.Pointer(field.Addr().Pointer()))
-									flag.UintVar(p, name, uint(default_.(uint64)), usage)
-								}
+								case reflect.String:
+									p := (*string)(unsafe.Pointer(field.Addr().Pointer()))
+									flag.StringVar(p, name, value, description)
 
-							default:
-								return fmt.Errorf("%T flags are not currently supported", field.Interface())
+								case reflect.Float64:
+									p := (*float64)(unsafe.Pointer(field.Addr().Pointer()))
+									if f, err := strconv.ParseFloat(value, 64); err != nil {
+										default_ = field.Float()
+									} else {
+										default_ = f
+									}
+									flag.Float64Var(p, name, default_.(float64), description)
+
+								case reflect.Int64, reflect.Uint64, reflect.Int, reflect.Uint:
+
+									switch kind {
+									case reflect.Int64, reflect.Int:
+										if i, err := strconv.ParseInt(value, 10, 64); err != nil {
+											default_ = field.Int()
+										} else {
+											default_ = i
+										}
+									case reflect.Uint64, reflect.Uint:
+										if i, err := strconv.ParseUint(value, 10, 64); err != nil {
+											default_ = field.Uint()
+										} else {
+											default_ = i
+										}
+									}
+
+									switch kind {
+									case reflect.Int64:
+										p := (*int64)(unsafe.Pointer(field.Addr().Pointer()))
+										flag.Int64Var(p, name, default_.(int64), description)
+									case reflect.Int:
+										p := (*int)(unsafe.Pointer(field.Addr().Pointer()))
+										flag.IntVar(p, name, int(default_.(int64)), description)
+									case reflect.Uint64:
+										p := (*uint64)(unsafe.Pointer(field.Addr().Pointer()))
+										flag.Uint64Var(p, name, default_.(uint64), description)
+									case reflect.Uint:
+										p := (*uint)(unsafe.Pointer(field.Addr().Pointer()))
+										flag.UintVar(p, name, uint(default_.(uint64)), description)
+									}
+
+								default:
+									return fmt.Errorf("%T flags are not currently supported", field.Interface())
+								}
+								if FlaggedDebugging {
+									fmt.Printf("%8s -%-40s env:%-20s value:%-20v usage:%s (%s)\n", field.Kind(), name, envrionment_, default_, description, destination)
+								}
+								return nil
+							}(); err != nil {
+								log.Println(err)
+								continue
 							}
-							if FlaggedDebugging {
-								fmt.Printf("%8s -%-40s env:%-20s value:%-20v usage:%s\n", field.Kind(), name, envrionment_, default_, usage)
-							}
-							return nil
-						}(); err != nil {
-							log.Println(err)
-							continue
+
 						}
 					}
 				}
 			}
 		}
 	default:
-		parser(reflect.ValueOf(value_), prefix, env)
+		parser(reflect.ValueOf(value_), prefix, parent, env)
 	}
 }

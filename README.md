@@ -142,3 +142,24 @@ Which produces:
 	  -ints.flag.int64=-2: An Int64. (ANINT64)
 	  -ints.flag.uint=1: An Uint. (ANUINT)
 	  -ints.flag.uint64=2: An Uint64. (ANUINT64)
+
+### flag aliases:
+
+The flag can be a comma-delimited list of flag names. Using `_` will include the standard struct-derived named as a flag.
+
+	var setting struct {
+		aliased struct {
+			x int `flag:"i,_" env:"ALIASED" value:"123" usage:"An Int."`
+			y int `flag:"yy" env:"ALIASED" value:"345" usage:"An Int."`
+			z int `flag:"_,a" env:"ALIASED" value:"567" usage:"An Int."`
+		}
+	}
+
+Which produces:
+
+	Usage of ./ex:
+		-a=567: alias for -aliased.z: An Int. (ALIASED)
+		-aliased.x=123: alias for -i: An Int. (ALIASED)
+		-aliased.z=567: An Int. (ALIASED)
+		-i=123: An Int. (ALIASED)
+		-yy=345: An Int. (ALIASED)

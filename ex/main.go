@@ -4,7 +4,8 @@ import (
 	"flag"
 	"log"
 
-	flagged "github.com/Urban4M/go-flagged"
+	// flagged "github.com/Urban4M/go-flagged"
+	flagged ".."
 )
 
 //
@@ -50,6 +51,11 @@ var setting struct {
 			anUint   uint   `flag:"flag.uint" env:"ANUINT" value:"1" usage:"An Uint."`
 			anUint64 uint64 `flag:"flag.uint64" env:"ANUINT64" value:"2" usage:"An Uint64."`
 		}
+	}
+	aliased struct {
+		x int `flag:"i,_" env:"ALIASED" value:"123" usage:"An Int."`
+		y int `flag:"yy" env:"ALIASED" value:"345" usage:"An Int."`
+		z int `flag:"_,a" env:"ALIASED" value:"567" usage:"An Int."`
 	}
 }
 

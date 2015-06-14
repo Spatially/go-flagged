@@ -22,6 +22,7 @@ var setting struct {
 		aString string  `flag:"string" env:"STRING" value:"default string" usage:"A String."`
 		aBool   bool    `flag:"bool" env:"BOOL" value:"true" usage:"A Bool."`
 		aFloat  float64 `flag:"float" env:"FLOAT" value:"123.456" usage:"A Float."`
+		DB      string  `flag:"db" usage:"database"`
 		ints    struct {
 			anInt    int    `flag:"int" env:"INT" value:"123" usage:"An Int."`
 			anInt64  int64  `flag:"int64" env:"INT64" value:"456" usage:"An Int64."`
