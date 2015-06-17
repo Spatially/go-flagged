@@ -1,10 +1,10 @@
 package main
 
 import (
-	"flag"
 	"log"
 
-	flagged "github.com/Urban4M/go-flagged"
+	// flagged "github.com/Urban4M/go-flagged"
+	flagged ".."
 )
 
 //
@@ -60,6 +60,14 @@ var setting struct {
 		one subsub `usage:"One. "`
 		two subsub
 	} `usage:"A sub. "`
+	_positional struct {
+		first  string  `usage:"Just the first"`
+		second int     `usage:"Just the second"`
+		third  float64 `usage:"Just the third" value:"3.0"`
+		fourth uint64  `usage:"Just the fourth" value:"4"`
+		fifth  int64   `usage:"Just the fifth"`
+		sixth  string  `usage:"Just the sixth" value:"sixth"`
+	}
 }
 
 type subsub struct {
@@ -76,6 +84,6 @@ func main() {
 	flagged.ParseWithPrefix(&setting.named, "weird", flagged.Continue)
 	// This is typically all you'll need to call:
 	flagged.Parse(&setting)
-	flag.Usage()
+	flagged.Usage()
 	log.Printf("%+v", setting)
 }
