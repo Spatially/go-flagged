@@ -175,9 +175,10 @@ func unpack(s []string, vars ...positional) error {
 			}
 		}
 	}
-	if i < ls {
-		fmt.Fprintf(os.Stderr, "Additional positional arguments ignored: %+v\n", s[i:])
-	}
+	// TODO support a slice as the last _positional so that the usage can indicate "...".
+	// if i < ls {
+	// 	fmt.Fprintf(os.Stderr, "Additional positional arguments ignored: %+v\n", s[i:])
+	// }
 
 	return nil
 }
