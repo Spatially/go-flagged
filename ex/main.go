@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	flagged "github.com/Urban4M/go-flagged"
+	flagged "github.com/Spatially/go-flagged"
 )
 
 //

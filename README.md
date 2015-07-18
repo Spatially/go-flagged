@@ -4,19 +4,19 @@
 
 # Status
 
-[![Build Status](https://travis-ci.org/Urban4M/go-flagged.png?branch=master)](https://travis-ci.org/Urban4M/go-flagged)
+[![Build Status](https://travis-ci.org/Spatially/go-flagged.png?branch=master)](https://travis-ci.org/Spatially/go-flagged)
 
 
 # Installation
 
 ```
-go get -v github.com/Urban4M/go-flagged
+go get -v github.com/Spatially/go-flagged
 ```
 
 
 # Documentation
 
-See [GoDoc](http://godoc.org/github.com/Urban4M/go-flagged) or [Go Walker](http://gowalker.org/github.com/Urban4M/go-flagged) for automatically generated documentation.
+See [GoDoc](http://godoc.org/github.com/Spatially/go-flagged) or [Go Walker](http://gowalker.org/github.com/Spatially/go-flagged) for automatically generated documentation.
 
 
 ## usage:
