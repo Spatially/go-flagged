@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -31,11 +32,17 @@ var selfz, selfd, selfu = os.Args[0], "", ""
 
 func init() {
 	selfd, selfu = "", filepath.Base(selfz)
-	if ln, err := filepath.EvalSymlinks(selfz); err != nil {
-		log.Fatal(err)
+	if dir, _ := filepath.Split(selfz); dir == "" {
+		if path, err := exec.LookPath(selfz); err != nil {
+			log.Println(err)
+		} else {
+			selfd = filepath.Base(path)
+		}
+	} else if ln, err := filepath.EvalSymlinks(selfz); err != nil {
+		log.Println(err)
 	} else {
 		if dir, err := filepath.Abs(filepath.Dir(ln)); err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		} else {
 			selfd = dir
 		}
